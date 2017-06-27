@@ -9,9 +9,9 @@
 #  Array of alerts (see README)
 #
 class prometheus::alerts (
-  String $location,
-  Array  $alerts,
-  String $alertfile_name  = 'alert.rules'
+  $location,
+  $alerts,
+  $alertfile_name  = 'alert.rules'
 ) inherits prometheus::params {
 
     if $alerts != [] {

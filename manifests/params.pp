@@ -24,6 +24,11 @@ class prometheus::params {
   $config_dir = '/etc/prometheus'
   $config_mode = '0660'
   $config_template = 'prometheus/prometheus.yaml.erb'
+  $docker_image_tag_alertmanager = 'v0.7.1'
+  $docker_image_tag_prometheus = 'v1.7.1'
+  $docker_ports_prometheus = ['9090:9090']
+  $docker_ports_alertmanager = ['9093:9093']
+  $docker_volumes_prometheus = ['/var/lib/prometheus:/prometheus', '/etc/prometheus:/etc/prometheus']
   $download_extension = 'tar.gz'
   $download_url_base = 'https://github.com/prometheus/prometheus/releases'
   $extra_groups = []

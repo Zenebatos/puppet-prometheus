@@ -134,6 +134,8 @@ class prometheus::alertmanager (
   $config_dir           = $::prometheus::params::alertmanager_config_dir,
   $config_file          = $::prometheus::params::alertmanager_config_file,
   $config_mode          = $::prometheus::params::config_mode,
+  $docker_image_tag     = $::prometheus::params::docker_image_tag_alertmanager,
+  $docker_ports         = $::prometheus::params::docker_ports_alertmanager,
   $download_extension   = $::prometheus::params::alertmanager_download_extension,
   $download_url         = undef,
   $download_url_base    = $::prometheus::params::alertmanager_download_url_base,
@@ -178,9 +180,19 @@ class prometheus::alertmanager (
   validate_array($inhibit_rules)
   validate_hash($global)
   validate_hash($route)
-  $notify_service = $restart_on_change ? {
-    true    => Service[$service_name],
-    default => undef,
+
+  if $manage_service and $restart_on_change {
+    case $install_method {
+      'docker': {
+        $notify_service = Docker::Run['alertmanager']
+        $init_style = 'docker'
+      }
+      default: {
+        $notify_service = Service[$service_name]
+      }
+    }
+  } else {
+    $notify_service = undef
   }
 
   file { $config_dir:
@@ -214,10 +226,17 @@ class prometheus::alertmanager (
       mode   => '0755',
     }
 
-    $options = "-config.file=${prometheus::alertmanager::config_file} -storage.path=${prometheus::alertmanager::storage_path} ${prometheus::alertmanager::extra_options}"
+    $options = "-config.file=${prometheus::alertmanager::config_file} \
+-storage.path=${prometheus::alertmanager::storage_path} ${prometheus::alertmanager::extra_options}"
   } else {
     $options = "-config.file=${prometheus::alertmanager::config_file} ${prometheus::alertmanager::extra_options}"
   }
+
+  $docker_command = "-config.file=/etc/alertmanager/config.yml -storage.path=/alertmanager\
+${prometheus::alertmanager::extra_options}"
+  $docker_volumes = ["${prometheus::alertmanager::storage_path}:/var/lib/alertmanager",
+    "${prometheus::alertmanager::config_dir}:/etc/alertmanager",
+  ]
 
   prometheus::daemon { $service_name:
     install_method     => $install_method,
@@ -241,5 +260,9 @@ class prometheus::alertmanager (
     service_ensure     => $service_ensure,
     service_enable     => $service_enable,
     manage_service     => $manage_service,
+    docker_image_tag   => $docker_image_tag,
+    docker_command     => $docker_command,
+    docker_ports       => $docker_ports,
+    docker_volumes     => $docker_volumes,
   }
 }

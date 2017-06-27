@@ -145,6 +145,8 @@ class prometheus (
   $alerts               = $::prometheus::params::alerts,
   $alert_relabel_config = $::prometheus::params::alert_relabel_config,
   $alertmanagers_config = $::prometheus::params::alertmanagers_config,
+  $docker_image_tag     = $::prometheus::params::docker_image_tag_prometheus,
+  $docker_ports         = $::prometheus::params::docker_ports_prometheus,
 ) inherits prometheus::params {
   if( versioncmp($::prometheus::version, '1.0.0') == -1 ){
     $real_download_url    = pick($download_url,
@@ -167,9 +169,23 @@ class prometheus (
 
   $config_hash_real = deep_merge($config_defaults, $config_hash)
   validate_hash($config_hash_real)
-  $notify_service = $restart_on_change ? {
-    true    => Class['::prometheus::run_service'],
-    default => undef,
+
+  if $manage_service and $restart_on_change {
+    case $install_method {
+      'docker': {
+        $notify_service = Docker::Run['prometheus']
+        $init_style = 'docker'
+        $docker_command = "-config.file=/etc/prometheus/prometheus.yml \
+-storage.local.path=/prometheus -web.console.libraries=/etc/prometheus/console_libraries \
+-web.console.templates=/etc/prometheus/consoles ${prometheus::extra_options}"
+        $docker_volumes = ["${prometheus::localstorage}:/prometheus", "${prometheus::config_dir}:/etc/prometheus"]
+      }
+      default: {
+        $notify_service = Class['::prometheus::run_service']
+      }
+    }
+  } else {
+    $notify_service = undef
   }
 
   anchor {'prometheus_first': }

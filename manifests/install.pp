@@ -56,6 +56,12 @@ class prometheus::install
         User[$::prometheus::user] -> Package[$::prometheus::package_name]
       }
     }
+    'docker': {
+      require ::docker
+      docker::image { 'prom/prometheus':
+        image_tag => $::prometheus::docker_image_tag,
+      }
+    }
     'none': {}
     default: {
       fail("The provided install method ${::prometheus::install_method} is invalid")

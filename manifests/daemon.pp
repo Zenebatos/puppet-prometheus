@@ -21,6 +21,10 @@ define prometheus::daemon (
   $service_ensure     = 'running',
   $service_enable     = true,
   $manage_service     = true,
+  $docker_image_tag   = undef,
+  $docker_command     = undef,
+  $docker_volumes     = undef,
+  $docker_ports       = undef,
 ) {
 
   case $install_method {
@@ -51,6 +55,12 @@ define prometheus::daemon (
       }
       if $manage_user {
         User[$user] -> Package[$package_name]
+      }
+    }
+    'docker': {
+      require ::docker
+      docker::image { "prom/${name}":
+        image_tag => $docker_image_tag,
       }
     }
     'none': {}
@@ -145,6 +155,9 @@ define prometheus::daemon (
           notify  => $notify_service,
         }
       }
+      'docker' : {
+        # Do Nothing ; Creation of init file is handled by Docker puppet module
+      }
       default : {
         fail("I don't know how to create an init script for style ${init_style}")
       }
@@ -157,10 +170,19 @@ define prometheus::daemon (
   }
 
   if $manage_service == true {
-    service { $name:
-      ensure => $service_ensure,
-      name   => $init_selector,
-      enable => $service_enable,
+    if $init_style == 'docker' {
+      docker::run { $name:
+        image   => "prom/${name}",
+        command => $docker_command,
+        volumes => $docker_volumes,
+        ports   => $docker_ports,
+      }
+    } else {
+      service { $name:
+        ensure => $service_ensure,
+        name   => $init_selector,
+        enable => $service_enable,
+      }
     }
   }
 }

@@ -8,72 +8,72 @@ class prometheus::config(
   $config_template = $::prometheus::params::config_template,
 ) {
 
-  if $prometheus::init_style {
-
-    case $prometheus::init_style {
-      'upstart' : {
-        file { '/etc/init/prometheus.conf':
-          mode    => '0444',
-          owner   => 'root',
-          group   => 'root',
-          content => template('prometheus/prometheus.upstart.erb'),
-        }
-        file { '/etc/init.d/prometheus':
-          ensure => link,
-          target => '/lib/init/upstart-job',
-          owner  => 'root',
-          group  => 'root',
-          mode   => '0755',
-        }
+  case $prometheus::init_style {
+    'upstart' : {
+      file { '/etc/init/prometheus.conf':
+        mode    => '0444',
+        owner   => 'root',
+        group   => 'root',
+        content => template('prometheus/prometheus.upstart.erb'),
       }
-      'systemd' : {
-        file { '/etc/systemd/system/prometheus.service':
-          mode    => '0644',
-          owner   => 'root',
-          group   => 'root',
-          content => template('prometheus/prometheus.systemd.erb'),
-        }
-        ~> exec { 'prometheus-systemd-reload':
-          command     => 'systemctl daemon-reload',
-          path        => [ '/usr/bin', '/bin', '/usr/sbin' ],
-          refreshonly => true,
-        }
+      file { '/etc/init.d/prometheus':
+        ensure => link,
+        target => '/lib/init/upstart-job',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0755',
       }
-      'sysv' : {
-        file { '/etc/init.d/prometheus':
-          mode    => '0555',
-          owner   => 'root',
-          group   => 'root',
-          content => template('prometheus/prometheus.sysv.erb'),
-        }
+    }
+    'systemd' : {
+      file { '/etc/systemd/system/prometheus.service':
+        mode    => '0644',
+        owner   => 'root',
+        group   => 'root',
+        content => template('prometheus/prometheus.systemd.erb'),
       }
-      'debian' : {
-        file { '/etc/init.d/prometheus':
-          mode    => '0555',
-          owner   => 'root',
-          group   => 'root',
-          content => template('prometheus/prometheus.debian.erb'),
-        }
+      ~> exec { 'prometheus-systemd-reload':
+        command     => 'systemctl daemon-reload',
+        path        => [ '/usr/bin', '/bin', '/usr/sbin' ],
+        refreshonly => true,
       }
-      'sles' : {
-        file { '/etc/init.d/prometheus':
-          mode    => '0555',
-          owner   => 'root',
-          group   => 'root',
-          content => template('prometheus/prometheus.sles.erb'),
-        }
+    }
+    'sysv' : {
+      file { '/etc/init.d/prometheus':
+        mode    => '0555',
+        owner   => 'root',
+        group   => 'root',
+        content => template('prometheus/prometheus.sysv.erb'),
       }
-      'launchd' : {
-        file { '/Library/LaunchDaemons/io.prometheus.daemon.plist':
-          mode    => '0644',
-          owner   => 'root',
-          group   => 'wheel',
-          content => template('prometheus/prometheus.launchd.erb'),
-        }
+    }
+    'debian' : {
+      file { '/etc/init.d/prometheus':
+        mode    => '0555',
+        owner   => 'root',
+        group   => 'root',
+        content => template('prometheus/prometheus.debian.erb'),
       }
-      default : {
-        fail("I don't know how to create an init script for style ${prometheus::init_style}")
+    }
+    'sles' : {
+      file { '/etc/init.d/prometheus':
+        mode    => '0555',
+        owner   => 'root',
+        group   => 'root',
+        content => template('prometheus/prometheus.sles.erb'),
       }
+    }
+    'launchd' : {
+      file { '/Library/LaunchDaemons/io.prometheus.daemon.plist':
+        mode    => '0644',
+        owner   => 'root',
+        group   => 'wheel',
+        content => template('prometheus/prometheus.launchd.erb'),
+      }
+    }
+    'docker' : {
+      # Do nothing; creation of prometheus's service file will be handled by docker module
+    }
+    default : {
+      fail("I don't know how to create an init script for style ${prometheus::init_style}")
     }
   }
 
