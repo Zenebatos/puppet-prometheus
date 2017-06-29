@@ -174,7 +174,7 @@ class prometheus (
     case $install_method {
       'docker': {
         $notify_service = Docker::Run['prometheus']
-        $docker_command = "-config.file=/etc/prometheus/prometheus.yml \
+        $docker_command = "-config.file=/etc/prometheus/prometheus.yaml \
 -storage.local.path=/prometheus -web.console.libraries=/etc/prometheus/console_libraries \
 -web.console.templates=/etc/prometheus/consoles ${prometheus::extra_options}"
         $docker_volumes = ["${prometheus::localstorage}:/prometheus", "${prometheus::config_dir}:/etc/prometheus"]

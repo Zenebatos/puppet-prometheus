@@ -232,7 +232,7 @@ class prometheus::alertmanager (
     $options = "-config.file=${prometheus::alertmanager::config_file} ${prometheus::alertmanager::extra_options}"
   }
 
-  $docker_command = "-config.file=/etc/alertmanager/config.yml -storage.path=/alertmanager\
+  $docker_command = "-config.file=/etc/alertmanager/config.yaml -storage.path=/alertmanager\
 ${prometheus::alertmanager::extra_options}"
   $docker_volumes = ["${prometheus::alertmanager::storage_path}:/var/lib/alertmanager",
     "${prometheus::alertmanager::config_dir}:/etc/alertmanager",
