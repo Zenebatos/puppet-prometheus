@@ -170,7 +170,7 @@ define prometheus::daemon (
   }
 
   if $manage_service == true {
-    if $init_style == 'docker' {
+    if $install_method == 'docker' {
       docker::run { $name:
         image   => "prom/${name}",
         command => $docker_command,

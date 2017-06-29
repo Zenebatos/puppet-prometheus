@@ -5,7 +5,7 @@
 #
 class prometheus::run_service {
   if $prometheus::manage_service == true {
-    if $::prometheus::init_style == 'docker' {
+    if $::prometheus::install_method == 'docker' {
       docker::run { 'prometheus':
         image   => 'prom/prometheus',
         command => $::prometheus::docker_command,
