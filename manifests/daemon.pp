@@ -87,7 +87,7 @@ define prometheus::daemon (
   }
 
 
-  if $init_style {
+  if $init_style and $install_method != 'docker' {
 
     case $init_style {
       'upstart' : {

@@ -185,7 +185,6 @@ class prometheus::alertmanager (
     case $install_method {
       'docker': {
         $notify_service = Docker::Run['alertmanager']
-        $init_style = 'docker'
       }
       default: {
         $notify_service = Service[$service_name]
@@ -194,6 +193,7 @@ class prometheus::alertmanager (
   } else {
     $notify_service = undef
   }
+
 
   file { $config_dir:
     ensure  => 'directory',
