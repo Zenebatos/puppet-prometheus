@@ -170,19 +170,15 @@ class prometheus (
   $config_hash_real = deep_merge($config_defaults, $config_hash)
   validate_hash($config_hash_real)
 
-  if $manage_service and $restart_on_change {
-    case $install_method {
-      'docker': {
-        $notify_service = Docker::Run['prometheus']
-        $docker_command = "-config.file=/etc/prometheus/prometheus.yml \
+  if $install_method == 'docker' {
+    $docker_command = "-config.file=/etc/prometheus/prometheus.yml \
 -storage.local.path=/prometheus -web.console.libraries=/etc/prometheus/console_libraries \
 -web.console.templates=/etc/prometheus/consoles ${prometheus::extra_options}"
-        $docker_volumes = ["${prometheus::localstorage}:/prometheus", "${prometheus::config_dir}:/etc/prometheus"]
-      }
-      default: {
-        $notify_service = Class['::prometheus::run_service']
-      }
-    }
+    $docker_volumes = ["${prometheus::localstorage}:/prometheus", "${prometheus::config_dir}:/etc/prometheus"]
+  }
+
+  if $manage_service and $restart_on_change {
+    $notify_service = Class['::prometheus::run_service']
   } else {
     $notify_service = undef
   }
