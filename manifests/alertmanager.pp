@@ -232,10 +232,8 @@ class prometheus::alertmanager (
     $options = "-config.file=${prometheus::alertmanager::config_file} ${prometheus::alertmanager::extra_options}"
   }
 
-  $docker_command = "-config.file=/etc/alertmanager/${config_file} -storage.path=/alertmanager\
-${prometheus::alertmanager::extra_options}"
-  $docker_volumes = ["${prometheus::alertmanager::storage_path}:/var/lib/alertmanager",
-    "${prometheus::alertmanager::config_dir}:/etc/alertmanager",
+  $docker_volumes = ["${prometheus::alertmanager::storage_path}:${prometheus::alertmanager::storage_path}",
+    "${prometheus::alertmanager::config_dir}:${prometheus::alertmanager::config_dir}",
   ]
 
   prometheus::daemon { $service_name:
@@ -261,7 +259,7 @@ ${prometheus::alertmanager::extra_options}"
     service_enable     => $service_enable,
     manage_service     => $manage_service,
     docker_image_tag   => $docker_image_tag,
-    docker_command     => $docker_command,
+    docker_command     => $options,
     docker_ports       => $docker_ports,
     docker_volumes     => $docker_volumes,
   }
