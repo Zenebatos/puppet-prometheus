@@ -176,6 +176,7 @@ define prometheus::daemon (
         command => $docker_command,
         volumes => $docker_volumes,
         ports   => $docker_ports,
+        net     => 'prometheus'
       }
     } else {
       service { $name:

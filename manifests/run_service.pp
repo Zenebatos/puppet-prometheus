@@ -11,6 +11,7 @@ class prometheus::run_service {
         command => $::prometheus::docker_command,
         volumes => $::prometheus::docker_volumes,
         ports   => $::prometheus::docker_ports,
+        net     => 'prometheus'
       }
 
     } else {

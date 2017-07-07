@@ -58,9 +58,15 @@ class prometheus::install
     }
     'docker': {
       require ::docker
+
       docker::image { 'prom/prometheus':
         image_tag => $::prometheus::docker_image_tag,
       }
+
+      docker_network { 'prometheus':
+        ensure   => present,
+      }
+
     }
     'none': {}
     default: {
