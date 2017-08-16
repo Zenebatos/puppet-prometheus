@@ -1,4 +1,4 @@
-<% scope.lookupvar(prometheus::alerts::alerts).each do |alert| -%>
+<% scope.lookupvar('::prometheus::alerts::alerts').each do |alert| -%>
 ALERT <%= alert['name'] %>
     IF <%= alert['condition'] %>
     FOR <%= alert['timeduration'] %>
