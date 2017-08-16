@@ -19,7 +19,7 @@ class prometheus::alerts (
                 ensure  => 'file',
                 owner   => $prometheus::user,
                 group   => $prometheus::group,
-                content => epp("${module_name}/alerts.epp"),
+                content => template("${module_name}/alerts.erb"),
         }
     }
 
